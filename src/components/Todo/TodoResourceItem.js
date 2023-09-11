@@ -1,38 +1,35 @@
 import { Badge, Button, Stack } from "@shopify/polaris";
-import { useState } from "react";
-import TodoApis from "../../../common/commonApis/todoListApi";
+import useDeleteAPI from "../../hooks/useDeleteAPI";
+import useUpdateAPI from "../../hooks/useUpdateAPI";
 
 const TodoResourceItem = ({ todo, setTodos }) => {
   const { isCompleted, text, id } = todo;
 
-  const [isCompletedLoading, setIsCompletedLoading] = useState(false);
-  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+  const { loading: isDeleteLoading, deleteData } = useDeleteAPI();
+  const { loading: isCompletedLoading, updateData } = useUpdateAPI();
 
   const handleCompleteTodo = async (e, id) => {
     try {
       e.stopPropagation();
-      if (isCompleted === true) return;
-      setIsCompletedLoading(true);
-      const res = await TodoApis.updateComplete(id);
-      const { data } = res.data;
-      setTodos([...data] || []);
-      setIsCompletedLoading(false);
+      const res = await updateData({ endpoint: "/todo", id });
+      const { success, data } = res.data;
+      if (success) {
+        setTodos(data);
+      }
     } catch (error) {
-      console.log(error);
-      setIsCompletedLoading(false);
+      console.error(error);
     }
   };
   const handleDeleteTodo = async (e, id) => {
     try {
       e.stopPropagation();
-      setIsDeleteLoading(true);
-      const res = await TodoApis.removeTodo(id);
-      const { data } = res.data;
-      setTodos([...data]);
-      setIsDeleteLoading(false);
+      const res = await deleteData("/todo", id);
+      const { success, data } = res.data;
+      if (success) {
+        setTodos(data);
+      }
     } catch (error) {
-      console.log(error);
-      setIsDeleteLoading(false);
+      console.error(error);
     }
   };
 

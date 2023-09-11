@@ -5,61 +5,60 @@ import {
   ResourceItem,
   ResourceList,
 } from "@shopify/polaris";
-import React, { useCallback, useEffect, useState } from "react";
-import TodoApis from "../../../common/commonApis/todoListApi";
+import { useCallback, useMemo, useState } from "react";
+import useFetchAPI from "../../hooks/useFetchAPI";
+import useUpdateAPI from "../../hooks/useUpdateAPI";
 import ModalTodoMarkup from "./ModalTodoMarkup";
 import TodoResourceItem from "./TodoResourceItem";
 
 const ActualPageMarkup = () => {
-  const [loading, setLoading] = useState(false);
   const [modalTodoActive, setToggleModalTodoActive] = useState(false);
   const [selectedTodos, setSelectedTodos] = useState([]);
-  const [todos, setTodos] = useState([]);
+  const [isCheckComplete, setIsCheckComplete] = useState(false);
 
-  const checkComplete = () => {
-    const newArr = todos.filter((todo) => selectedTodos.includes(todo.id));
-    const isChecked = newArr.every((item) => item.isCompleted === true);
-    return isChecked;
-  };
+  const { loading, setData: setTodos, data: todos } = useFetchAPI("/todos");
+  const { updateData: updateTodos } = useUpdateAPI();
+  const { updateData: deleteDatas } = useUpdateAPI();
 
-  useEffect(() => {
-    setLoading(true);
-    TodoApis.getTodos()
-      .then((res) => {
-        const { data } = res.data;
-        setTodos([...data] || []);
-      })
-      .catch((error) => console.log(error))
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
+  useMemo(() => {
+    const checkComplete = () => {
+      const newArr = todos.filter((todo) => selectedTodos.includes(todo.id));
+      const isChecked = newArr.every((item) => item.isCompleted === true);
+      setIsCheckComplete(isChecked);
+    };
+    checkComplete();
+  }, [selectedTodos, todos]);
 
   const handleCompleteTodosSelected = async () => {
     try {
-      const isCompleteEqualTrue = checkComplete();
-      if (isCompleteEqualTrue) return;
-      const res = await TodoApis.updateTodosSelected({
-        ids: selectedTodos,
+      if (isCheckComplete) return;
+      const res = await updateTodos({
+        endpoint: "/todos",
+        data: { ids: selectedTodos },
       });
-      const { data } = res.data;
-      setTodos([...data] || []);
+      const { success, data } = res.data;
+      if (success) {
+        setTodos(data);
+      }
       setSelectedTodos([]);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
   const handleDeleteTodosSelected = async () => {
     try {
-      const res = await TodoApis.deleteTodosSelected({
-        ids: selectedTodos,
+      const res = await deleteDatas({
+        endpoint: "/todos/delete-all",
+        data: { ids: selectedTodos },
       });
-      const { data } = res.data;
-      setTodos([...data] || []);
+      const { success, data } = res.data;
+      if (success) {
+        setTodos(data);
+      }
       setSelectedTodos([]);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -109,7 +108,7 @@ const ActualPageMarkup = () => {
             {
               content: "Complete",
               onAction: handleCompleteTodosSelected,
-              disabled: checkComplete() ? true : false,
+              disabled: isCheckComplete ? true : false,
             },
             {
               content: "Delete",

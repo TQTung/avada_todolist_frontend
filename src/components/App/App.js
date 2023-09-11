@@ -1,12 +1,13 @@
-import { Frame, Loading, Toast } from "@shopify/polaris";
-import { useState, useCallback, useRef } from "react";
-import { logo } from "./asset/logos/logo";
-import ContextualSaveBarMarkup from "./views/Dashboard/Navigation/ContextualSaveBarMarkup";
-import NavigationMarkup from "./views/Dashboard/Navigation/NavigationMarkup";
-import TopBarMarkup from "./views/Dashboard/TopBarMarkup";
-import ActualPageMarkup from "./views/pages/Todos/ActualPageMarkup";
-import LoadingPageMarkup from "./views/components/LoadingPageMarkup";
-import ModalMarkup from "./views/components/ModalMarkup";
+import ActualPageMarkup from "../Todo/ActualPageMarkup";
+import { Frame, Toast } from "@shopify/polaris";
+import { useCallback, useRef, useState } from "react";
+import TopBarMarkup from "../Dashboard/TopBarMarkup";
+import NavigationMarkup from "../Dashboard/Navigation/NavigationMarkup";
+import ContextualSaveBarMarkup from "../Dashboard/Navigation/ContextualSaveBarMarkup";
+import { Loading } from "@shopify/polaris";
+import LoadingPageMarkup from "../common/LoadingPageMarkup";
+import ModalMarkup from "../common/ModalMarkup";
+import { logo } from "../../asset/logos/logo";
 
 function FrameExample() {
   const defaultState = useRef({

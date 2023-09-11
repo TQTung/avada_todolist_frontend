@@ -1,6 +1,6 @@
 import { FormLayout, Modal, TextField } from "@shopify/polaris";
 import React, { useState } from "react";
-import TodoApis from "../../../common/commonApis/todoListApi";
+import useCreateAPI from "../../hooks/useCreateAPI";
 
 const ModalTodoMarkup = ({
   modalTodoActive,
@@ -8,23 +8,22 @@ const ModalTodoMarkup = ({
   setTodos,
 }) => {
   const [todoValue, setTodoValue] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { createData, loading: loadingCreate } = useCreateAPI();
 
   const handleAddNewTodo = async () => {
     try {
-      setLoading(true);
-      const res = await TodoApis.addNewTodo({
+      const res = await createData("/todos", {
         text: todoValue,
         isCompleted: false,
       });
-      const { data } = res.data;
-      setTodos([...data]);
+      const { success, data } = res.data;
+      if (success) {
+        setTodos(data);
+      }
       toggleModalTodoActive();
       setTodoValue("");
-      setLoading(false);
     } catch (error) {
-      console.log(error);
-      setLoading(false);
+      console.error(error);
     }
   };
 
@@ -41,7 +40,7 @@ const ModalTodoMarkup = ({
       primaryAction={{
         content: "Create",
         onAction: handleAddNewTodo,
-        loading: loading ? true : false,
+        loading: loadingCreate ? true : false,
         disabled: todoValue ? false : true,
       }}
       secondaryActions={[

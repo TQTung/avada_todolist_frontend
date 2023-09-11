@@ -6,7 +6,6 @@ import {
   SkeletonPage,
   TextContainer,
 } from "@shopify/polaris";
-import React from "react";
 
 const LoadingPageMarkup = () => {
   return (
